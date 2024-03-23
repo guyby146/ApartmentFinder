@@ -48,12 +48,16 @@ def search(city='', neighborhood='', propertyGroup='', property='', roomsRatio='
             price = driver.find_element(By.XPATH, "//*[@data-testid='price']").get_attribute('innerHTML')
             description = driver.find_element(By.XPATH, "//*[@class='description_description__zFgQ8']").get_attribute('innerHTML')
             assets = {
-                "Elevator" : False, "Disability" : False, "Tornado" : False, "Rav-Bariach" : False, "AC" : False, "Bars" : False, "Storage" : False, "Sun-Heated Boiler" : False, "Renovated" : False, "Shelter" : False, "Long-Range" : False, "Pets" : False, "Partners" : False
+                "מעלית" : False, "גישה לנכים" : False, "מזגן טורנדו" : False, "דלתות רב-בריח" : False, "מיזוג" : False, "סורגים" : False, "מחסן" : False, "דוד שמש" : False, "משופצת" : False, 'ממ"ד' : False, "לטווח ארוך" : False, "חיות מחמד" : False, "מתאים לשותפים" : False, "מרפסת" : False, "מרוהטת" : False
             }
             propertyAssets = driver.find_elements(By.XPATH, "//*[@data-testid='in-property-item']")
-            for asset, key in zip(propertyAssets, assets.keys()):
+            for asset in propertyAssets:
                 if not("disabled" in asset.get_attribute('class')):
-                    assets[key] = True
+                    asset_name = asset.find_element(By.XPATH, ".//*[@class='in-property-item_text__tGiqq']").get_attribute('innerHTML')
+                    assets[asset_name] = True
+    #        for asset, key in zip(propertyAssets, assets.keys()):
+    #            if not("disabled" in asset.get_attribute('class')):
+    #                assets[key] = True
             #print(len(assets), assets)
             #print('address = %s\nrooms = %s\nfloor = %s\nsize = %s\nprice = %s\ndescription = %s' %(address, rooms, floor, size, price, description))
             photos_elements = driver.find_elements(By.XPATH, "//*[@class='gallery-grid_gridItem___8kyD gallery-swiper_listItem__wXrFp']")
@@ -87,24 +91,28 @@ def make_message():
     f = open("format.txt", "r", encoding="utf-8")
     format = f.read()
     f.close()
-    print(format)
     properties = search('5000', '1520', 'apartments', '1', '4-5', '9000-10000')
     dict = {}
     assets = []
     for i in properties:
+        #print(properties[i]["assets"])
         for asset in properties[i]["assets"]:
             if properties[i]["assets"][asset]:
-                print(asset)
+                #print(asset)
+                #print(properties[i]["assets"][asset])
                 assets.append(asset)
-        text = format %(properties[i]["address"], properties[i]["price"], properties[i]["rooms"], properties[i]["size"], properties[i]["floor"], properties[i]["description"], properties[i]["assets"])
+        text = format %(properties[i]["address"], properties[i]["price"], properties[i]["rooms"], properties[i]["size"], properties[i]["floor"], properties[i]["description"], ", ".join(assets))
         dict[i] = {"videos" : properties[i]["videos"], "photos" : properties[i]["photos"], "desc" : text}
-    print(dict)
+        assets.clear()
+    print("finished searching all")
+    time.sleep(2)
+    #print(dict)
     return dict
         
 
 
 if __name__ == '__main__':
-    make_message()
+    print(make_message())
 
 """
 use all of the pip installs bellow to run

@@ -12,15 +12,25 @@ bot = telebot.TeleBot(BOT_TOKEN)
 
 def send_media_group_with_urls(chat_id, photo_urls, text, video_urls = None):
     media_group = [telebot.types.InputMediaPhoto(media=url) for url in photo_urls]
+    media_group_with_video = media_group
     if video_urls:
         for url in video_urls:
+            #print("url = " + str(telebot.types.InputMediaVideo(media=url)))
             media_group.append(telebot.types.InputMediaVideo(media=url)) 
-    print(len(media_group))
+    #print(media_group)
+    #print(len(media_group))
+    #try:
     if len(media_group) > 10:
         bot.send_media_group(chat_id, media=media_group[:9])
         bot.send_media_group(chat_id, media=media_group[9:-1])
     else:
         bot.send_media_group(chat_id, media=media_group)
+    #except:
+    #    if len(media_group) > 10:
+    #        bot.send_media_group(chat_id, media=media_group[:9])
+    #        bot.send_media_group(chat_id, media=media_group[9:-1])
+    #    else:
+    #        bot.send_media_group(chat_id, media=media_group)
     bot.send_message(chat_id, text)
     
 
@@ -38,13 +48,18 @@ def send_photo(message):
     for i in msg:
         photo_urls = msg[i]["photos"]
         video_urls = msg[i]["videos"]
-        print(photo_urls)
+        #print(photo_urls)
+        #print(video_urls)
         text = msg[i]["desc"]
 
     
 
     # Send the photos as a media group with text to the chat
-        send_media_group_with_urls(chat_id, photo_urls, text, video_urls)
+        try:
+            send_media_group_with_urls(chat_id, photo_urls, text, video_urls)
+        except:
+            print('sent without video')
+            send_media_group_with_urls(chat_id, photo_urls, text)
         time.sleep(2)
     apartments_sent = len(msg.keys())
     finished_message = "נשלחו %s דירות" %(apartments_sent)
