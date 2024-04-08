@@ -2,11 +2,16 @@ import os
 from search import make_message
 import telebot
 import time
+from json import loads
 #from telegram import Bot, InputMediaPhoto
 
 f = open("token.txt", "r")
 BOT_TOKEN = f.read()
 f.close()
+f = open("settlementsCodes.txt", "r")
+codes = loads(f.read())
+f.close()
+print(codes)
 
 bot = telebot.TeleBot(BOT_TOKEN)
 
@@ -32,7 +37,7 @@ def send_media_group_with_urls(chat_id, photo_urls, text, video_urls = None):
     #    else:
     #        bot.send_media_group(chat_id, media=media_group)
     bot.send_message(chat_id, text)
-    
+
 
 
 @bot.message_handler(commands=['start', 'hello'])
@@ -71,21 +76,33 @@ def send_photo(message):
 def echo_all(message):
     bot.reply_to(message, message.text)
     chat_id = message.chat.id
+    call = message.chat
     # List of photo URLs to send
-    photo_urls = [
-        'https://img.yad2.co.il/Pic/202403/12/2_2/o/y2_1pa_010106_20240312201811.jpeg',
-        'https://img.yad2.co.il/Pic/202403/12/2_2/o/y2_1pa_010106_20240312201811.jpeg',
-        'https://img.yad2.co.il/Pic/202403/12/2_2/o/y2_1pa_010106_20240312201811.jpeg'
-    ]  # Add URLs to your photos
+    stringList = {"Name": "John", "Language": "Python", "API": "pyTelegramBotAPI"}
 
-    # Additional text to send along with the photos
-    text = "Here are some photos for you:"
+    markup = telebot.types.InlineKeyboardMarkup()
+    i =0
+    for key, value in codes.items():
+        i +=1
+        print(type(key), type(value))
+        markup.add(telebot.types.InlineKeyboardButton(text=key, callback_data=value))
+        if i>4: break
+    bot.send_message(chat_id, text='choose', reply_markup=markup)
+    #print(message)
+    """if (call.data.startswith("['value'")):
+        print('inside')
+        print(f"call.data : {call.data} , type : {type(call.data)}")
+        print(f"ast.literal_eval(call.data) : {ast.literal_eval(call.data)} , type : {type(ast.literal_eval(call.data))}")
+        valueFromCallBack = ast.literal_eval(call.data)[1]
+        keyFromCallBack = ast.literal_eval(call.data)[2]
+        bot.answer_callback_query(callback_query_id=chat_id, show_alert=True,
+                                text="You Clicked " + valueFromCallBack + " and key is " + keyFromCallBack)
+    """
 
-    # Send the photos as a media group with text to the chat
-    send_media_group_with_urls(chat_id, photo_urls, text)
-
-
-
+@bot.callback_query_handler(func=lambda call:True)
+def answer(callback):
+    
+    print(callback.data)
 
 
 bot.infinity_polling()
